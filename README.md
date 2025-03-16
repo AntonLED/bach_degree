@@ -1,1 +1,1 @@
-# bach_degree
+# My Bachelor's degree in the MIPT  
