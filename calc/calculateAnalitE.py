@@ -127,7 +127,6 @@ def Ec(x, y, z, q, popt: popt):
                     / popt.kappa_d
                 )
 
-    # return np.array([Ec_x / r_D_e**2, Ec_y / r_D_e**2, Ec_z / r_D_e**2])
     return np.array([Ec_x, Ec_y, Ec_z])
 
 
@@ -136,55 +135,75 @@ def newEw(x, y, z, q, popt: popt):
     Ew_y = np.zeros(2)
     Ew_z = np.zeros(2)
 
-    i, j = 1, 0
+    top_idx = 0
+    bot_idx = 1
 
-    Ew_x[j] = 0.0
-    Ew_y[j] = 0.0
-    Ew_z[j] = 0.0
+    Ew_x[top_idx] = 0.0
+    Ew_y[top_idx] = 0.0
+    Ew_z[top_idx] = 0.0
 
-    r_ij = np.sqrt(np.square(x[i] - x[j]) + np.square(y[i] - y[j]))
+    r_ij = np.sqrt(
+        np.square(x[bot_idx] - x[top_idx]) + np.square(y[bot_idx] - y[top_idx])
+    )
 
+    dz0 = 0.0004820578534045655
+
+    # z_w = (1 - popt.z_w) * r_D_e
+    # z_w = popt.z_w
     z_w = popt.z_w * r_D_e
+    # z_w = z[top_idx] - 0.1 * dz0
 
     coeff = np.exp(
         -popt.a_w * np.square(r_ij)
-        - 2 * popt.b_w * r_ij * (z[i] - z[j] + z_w)
-        - popt.c_w * np.square(z[i] - z[j] + z_w)
+        - 2 * popt.b_w * r_ij * (z[bot_idx] - z[top_idx] + z_w)
+        - popt.c_w * np.square(z[bot_idx] - z[top_idx] + z_w)
     )
 
     if r_ij != 0:
-        Ew_x[i] = -1 * (
+        Ew_x[bot_idx] = -1 * (
             coeff
             * k
             * popt.q_w
             / r_D_e
             * (
-                -2 * popt.a_w * (x[i] - x[j])
-                - 2 * popt.b_w * (z[i] - z[j] + z_w) * (x[i] - x[j]) / r_ij
+                -2 * popt.a_w * (x[bot_idx] - x[top_idx])
+                - 2
+                * popt.b_w
+                * (z[bot_idx] - z[top_idx] + z_w)
+                * (x[bot_idx] - x[top_idx])
+                / r_ij
             )
         )
-        Ew_y[i] = -1 * (
+        Ew_y[bot_idx] = -1 * (
             coeff
             * k
             * popt.q_w
             / r_D_e
             * (
-                -2 * popt.a_w * (y[i] - y[j])
-                - 2 * popt.b_w * (z[i] - z[j] + z_w) * (y[i] - y[j]) / r_ij
+                -2 * popt.a_w * (y[bot_idx] - y[top_idx])
+                - 2
+                * popt.b_w
+                * (z[bot_idx] - z[top_idx] + z_w)
+                * (y[bot_idx] - y[top_idx])
+                / r_ij
             )
         )
-        Ew_z[i] = -1 * (
+        Ew_z[bot_idx] = -1 * (
             coeff
             * k
             * popt.q_w
             / r_D_e
-            * (-2 * popt.b_w * r_ij - 2 * popt.c_w * (z[i] - z[j] + z_w))
+            * (-2 * popt.b_w * r_ij - 2 * popt.c_w * (z[bot_idx] - z[top_idx] + z_w))
         )
     else:
-        Ew_x[i] = 0.0
-        Ew_y[i] = 0.0
-        Ew_z[i] = -1 * (
-            coeff * k * popt.q_w / r_D_e * (-2 * popt.c_w * (z[i] - z[j] + z_w))
+        Ew_x[bot_idx] = 0.0
+        Ew_y[bot_idx] = 0.0
+        Ew_z[bot_idx] = -1 * (
+            coeff
+            * k
+            * popt.q_w
+            / r_D_e
+            * (-2 * popt.c_w * (z[bot_idx] - z[top_idx] + z_w))
         )
 
     return np.array([Ew_x, Ew_y, Ew_z])

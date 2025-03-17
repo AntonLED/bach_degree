@@ -21,7 +21,7 @@ folder_path = "data/calibration/"
 file_path = os.path.join(folder_path, "data.txt")
 Path(folder_path).mkdir(parents=True, exist_ok=True)
 with open(file_path, "w") as file:
-    file.write("idx\tEx_ref\tEy_ref\tEz_ref\tEw_x\tEw_y\tEw_z\n\n")
+    file.write("idx\tx\ty\tz\tEx_ref\tEy_ref\tEz_ref\tEw_x\tEw_y\tEw_z\n\n")
 
 k_B = 1.380649e-23  # Boltzmann constant (J/K)
 m_i = 6.6335209e-26  # Ar+ ions' mass (kg)
@@ -37,6 +37,12 @@ d_t_p = 5e-5  # integration step for dust particles dynamics, s
 N_p = 2  # number of dust particles
 r_p = 4.445e-6  # Dust particle radius
 P = 0.25 * 18.131842  # Pressure (Pascal)
+
+X_TOP = 0.0
+X_BOT = 0.0
+
+Y_TOP = 0.0
+Y_BOT = 0.0
 
 Z_TOP = 0.0032248049595676263
 Z_BOT = 0.002742747106163061
@@ -57,8 +63,8 @@ charge = Charge()
 
 timestamp = 0.0
 
-x_top, y_top, z_top = 0.0, 0.0, Z_TOP
-x_bot, y_bot, z_bot = 0.0, 0.0, Z_BOT
+x_top, y_top, z_top = X_TOP, Y_TOP, Z_TOP
+x_bot, y_bot, z_bot = X_BOT, Y_BOT, Z_BOT
 
 xs = np.array([x_top, x_bot])
 ys = np.array([y_top, y_bot])
@@ -70,50 +76,135 @@ E_x_ref, E_y_ref, E_z_ref = plasma.calculatePlasmaE(
     xs / r_D_e, ys / r_D_e, zs / r_D_e, qs
 )
 
+# x \in [-r_D_e, +r_D_e]
 # y \in [-r_D_e, +r_D_e]
 # z \in [-dist / 2, +dist / 2]
+xs_interval = np.linspace(-r_D_e, +r_D_e, 100)
 ys_interval = np.linspace(-r_D_e, +r_D_e, 100)
-zs_interval = np.linspace(-(z_top - z_bot) / 2, +(z_top - z_bot) / 2)
+zs_interval = np.linspace(-(z_top - z_bot) / 2, +(z_top - z_bot) / 2, 100)
 
-for y in ys_interval:
-    for z in zs_interval:
-        y_bot = y
-        z_bot = z
+file_path = os.path.join(folder_path, "data_with_fixed_yz.txt")
+with open(file_path, "w") as file:
+    file.write("idx\tx\ty\tz\tEx_ref\tEy_ref\tEz_ref\tEw_x\tEw_y\tEw_z\n\n")
+for x in xs_interval:
+    x_bot = x
+    y_bot = Y_BOT
+    z_bot = Z_BOT
 
-        xs = np.array([x_top, x_bot])
-        ys = np.array([y_top, y_bot])
-        zs = np.array([z_top, z_bot])
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
 
-        E_x_analit, E_y_analit, E_z_analit = calculateAnalitE(
-            xs,
-            ys,
-            zs,
-            qs,
-        )
-        Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
-            xs,
-            ys,
-            zs,
-            qs,
-        )
-        E_x_ref, E_y_ref, E_z_ref = plasma.calculatePlasmaE(
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
             xs / r_D_e,
             ys / r_D_e,
             zs / r_D_e,
             qs,
         )
+        / qs
+    )
 
-        # print(E_x_ref, E_y_ref, E_z_ref)
-        # print(Ew_x_analit, Ew_y_analit, Ew_z_analit)
+    with open(file_path, "a") as output:
+        output.write(
+            f"{TOP_IDX}\t"
+            f"{xs[TOP_IDX]}\t{ys[TOP_IDX]}\t{zs[TOP_IDX]}\t"
+            f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
+            f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
+        )
+        output.write(
+            f"{BOT_IDX}\t"
+            f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
+            f"{E_x_ref[BOT_IDX]}\t{E_y_ref[BOT_IDX]}\t{E_z_ref[BOT_IDX]}\t"
+            f"{Ew_x_analit[BOT_IDX]}\t{Ew_y_analit[BOT_IDX]}\t{Ew_z_analit[BOT_IDX]}\n"
+        )
 
-        with open(file_path, "a") as output:
-            output.write(
-                f"{TOP_IDX}\t"
-                f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
-                f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
-            )
-            output.write(
-                f"{BOT_IDX}\t"
-                f"{E_x_ref[BOT_IDX]}\t{E_y_ref[BOT_IDX]}\t{E_z_ref[BOT_IDX]}\t"
-                f"{Ew_x_analit[BOT_IDX]}\t{Ew_y_analit[BOT_IDX]}\t{Ew_z_analit[BOT_IDX]}\n"
-            )
+file_path = os.path.join(folder_path, "data_with_fixed_xz.txt")
+with open(file_path, "w") as file:
+    file.write("idx\tx\ty\tz\tEx_ref\tEy_ref\tEz_ref\tEw_x\tEw_y\tEw_z\n\n")
+for y in ys_interval:
+    x_bot = X_BOT
+    y_bot = y
+    z_bot = Z_BOT
+
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
+
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
+            xs / r_D_e,
+            ys / r_D_e,
+            zs / r_D_e,
+            qs,
+        )
+        / qs
+    )
+
+    with open(file_path, "a") as output:
+        output.write(
+            f"{TOP_IDX}\t"
+            f"{xs[TOP_IDX]}\t{ys[TOP_IDX]}\t{zs[TOP_IDX]}\t"
+            f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
+            f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
+        )
+        output.write(
+            f"{BOT_IDX}\t"
+            f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
+            f"{E_x_ref[BOT_IDX]}\t{E_y_ref[BOT_IDX]}\t{E_z_ref[BOT_IDX]}\t"
+            f"{Ew_x_analit[BOT_IDX]}\t{Ew_y_analit[BOT_IDX]}\t{Ew_z_analit[BOT_IDX]}\n"
+        )
+
+file_path = os.path.join(folder_path, "data_with_fixed_xy.txt")
+with open(file_path, "w") as file:
+    file.write("idx\tx\ty\tz\tEx_ref\tEy_ref\tEz_ref\tEw_x\tEw_y\tEw_z\n\n")
+for z in zs_interval:
+    x_bot = X_BOT
+    y_bot = Y_BOT
+    z_bot = z
+
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
+
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
+            xs / r_D_e,
+            ys / r_D_e,
+            zs / r_D_e,
+            qs,
+        )
+        / qs
+    )
+
+    with open(file_path, "a") as output:
+        output.write(
+            f"{TOP_IDX}\t"
+            f"{xs[TOP_IDX]}\t{ys[TOP_IDX]}\t{zs[TOP_IDX]}\t"
+            f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
+            f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
+        )
+        output.write(
+            f"{BOT_IDX}\t"
+            f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
+            f"{E_x_ref[BOT_IDX]}\t{E_y_ref[BOT_IDX]}\t{E_z_ref[BOT_IDX]}\t"
+            f"{Ew_x_analit[BOT_IDX]}\t{Ew_y_analit[BOT_IDX]}\t{Ew_z_analit[BOT_IDX]}\n"
+        )
