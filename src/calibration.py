@@ -118,6 +118,32 @@ for x in xs_interval:
             f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
             f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
         )
+for x in xs_interval:
+    x_bot = x
+    y_bot = Y_BOT
+    z_bot = Z_BOT
+
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
+
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
+            xs / r_D_e,
+            ys / r_D_e,
+            zs / r_D_e,
+            qs,
+        )
+        / qs
+    )
+
+    with open(file_path, "a") as output:
         output.write(
             f"{BOT_IDX}\t"
             f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
@@ -160,6 +186,32 @@ for y in ys_interval:
             f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
             f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
         )
+for y in ys_interval:
+    x_bot = X_BOT
+    y_bot = y
+    z_bot = Z_BOT
+
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
+
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
+            xs / r_D_e,
+            ys / r_D_e,
+            zs / r_D_e,
+            qs,
+        )
+        / qs
+    )
+
+    with open(file_path, "a") as output:
         output.write(
             f"{BOT_IDX}\t"
             f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
@@ -202,6 +254,32 @@ for z in zs_interval:
             f"{E_x_ref[TOP_IDX]}\t{E_y_ref[TOP_IDX]}\t{E_z_ref[TOP_IDX]}\t"
             f"{Ew_x_analit[TOP_IDX]}\t{Ew_y_analit[TOP_IDX]}\t{Ew_z_analit[TOP_IDX]}\n"
         )
+for z in zs_interval:
+    x_bot = X_BOT
+    y_bot = Y_BOT
+    z_bot = z
+
+    xs = np.array([x_top, x_bot])
+    ys = np.array([y_top, y_bot])
+    zs = np.array([z_top, z_bot])
+
+    Ew_x_analit, Ew_y_analit, Ew_z_analit = getWake(
+        xs,
+        ys,
+        -zs,
+        qs,
+    )
+    E_x_ref, E_y_ref, E_z_ref = (
+        plasma.calculatePlasmaE(
+            xs / r_D_e,
+            ys / r_D_e,
+            zs / r_D_e,
+            qs,
+        )
+        / qs
+    )
+
+    with open(file_path, "a") as output:
         output.write(
             f"{BOT_IDX}\t"
             f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
