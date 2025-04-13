@@ -129,14 +129,14 @@ def Ew(x, y, z, q, popt: popt):
     return np.array([Ew_x, Ew_y, Ew_z])
 
 
-def calculateAnalitE(x, y, z, q):
+def calculateAnalitE(x, y, z, q, wake_coeff=1.0):
     N = x.shape[0]
     E_x = np.zeros(N)
     E_y = np.zeros(N)
     E_z = np.zeros(N)
 
     E_c = Ec(x, y, z, q, POPT)
-    E_w = Ew(x, y, -z, q, POPT)
+    E_w = wake_coeff * Ew(x, y, -z, q, POPT)
 
     E_x, E_y, E_z = E_c + E_w
 

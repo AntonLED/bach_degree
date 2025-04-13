@@ -19,7 +19,7 @@ if len(sys.argv) == 2:
     data_path = os.path.join(folder_path, f"data_{sys.argv[1]}.txt")
     Path(folder_path).mkdir(parents=True, exist_ok=True)
 elif len(sys.argv) == 3:
-    folder_path = "data/new_traps/"
+    folder_path = "data/new_wakes/"
     file_path = os.path.join(folder_path, f"traj_{sys.argv[1]}.xyz")
     data_path = os.path.join(folder_path, f"data_{sys.argv[1]}.txt")
     Path(folder_path).mkdir(parents=True, exist_ok=True)
@@ -41,8 +41,8 @@ g = 9.8  # free fall acceleration (m/s^2)
 rho = 1500  # mass density of dust particle
 steps = 300_000  # number of dust particles time steps
 T_p = 300  # Kinetic temperature of dust particles motion
-E_x_trap = -float(sys.argv[1]) * 1035598  # x-trap (kg/s^2)
-E_y_trap = -float(sys.argv[1]) * 1035598  # y-trap (kg/s^2)
+E_x_trap = -1.0 * 1035598  # x-trap (kg/s^2)
+E_y_trap = -1.0 * 1035598  # y-trap (kg/s^2)
 dt = 5e-5  # integration step for dust particles dynamics, s
 r_p = 4.445e-6  # Dust particle radius
 m_p = 4.0 / 3.0 * np.pi * r_p**3 * rho
@@ -79,7 +79,7 @@ vys = np.array([VY_TOP_INIT, VY_BOT_INIT])
 vzs = np.array([VZ_TOP_INIT, VZ_BOT_INIT])
 qs = charge.calculateLinearCharge(xs / r_D_e, ys / r_D_e, zs / r_D_e)
 
-E_x, E_y, E_z = calculateAnalitE(xs, ys, zs, qs)
+E_x, E_y, E_z = calculateAnalitE(xs, ys, zs, qs, wake_coeff=float(sys.argv[1]))
 E_trap_to_approximate = m_p * g / qs - E_z
 E_0, alpha = fit(zs, E_trap_to_approximate)
 
@@ -99,7 +99,7 @@ if sys.argv[2] == "1.0":
     VZ_BOT_INIT = 0.00012806075899425201
 else:
     _xs, _ys, _zs, _vxs, _vys, _vzs = get_snapshot(
-        f"data/new_traps/data_{sys.argv[2]}.txt"
+        f"data/new_wakes/data_{sys.argv[2]}.txt"
     )
     X_TOP_INIT = _xs[TOP_IDX]
     Y_TOP_INIT = _ys[TOP_IDX]
@@ -131,7 +131,7 @@ for step in range(steps):
     f_therm_p_z = np.random.normal(0, s_p, 2) - m_p * gamma_p * vzs
 
     # calculate fields
-    E_x, E_y, E_z = calculateAnalitE(xs, ys, zs, qs)
+    E_x, E_y, E_z = calculateAnalitE(xs, ys, zs, qs, wake_coeff=float(sys.argv[1]))
     E_z_trap = E_0 + alpha * zs
 
     # calculate accs
