@@ -95,6 +95,9 @@ for step in range(steps):
     E_x, E_y, E_z = calculateAnalitE(xs, ys, zs, qs)
     E_z_trap = E_0 + alpha * zs
 
+    fx = E_x * qs
+    fy = E_y * qs
+    fz = E_z * qs
     # calculate accs
     axs = -E_x_trap * qs * xs / m_p + E_x * qs / m_p + f_therm_p_x / m_p
     ays = -E_y_trap * qs * ys / m_p + E_y * qs / m_p + f_therm_p_y / m_p
@@ -130,5 +133,7 @@ for step in range(steps):
                 f"{xs[TOP_IDX]}\t{ys[TOP_IDX]}\t{zs[TOP_IDX]}\t"
                 f"{xs[BOT_IDX]}\t{ys[BOT_IDX]}\t{zs[BOT_IDX]}\t"
                 f"{vxs[TOP_IDX]}\t{vys[TOP_IDX]}\t{vzs[TOP_IDX]}\t"
-                f"{vxs[BOT_IDX]}\t{vys[BOT_IDX]}\t{vzs[BOT_IDX]}\n"
+                f"{vxs[BOT_IDX]}\t{vys[BOT_IDX]}\t{vzs[BOT_IDX]}\t"
+                f"{fx[TOP_IDX]}\t{fy[TOP_IDX]}\t{fz[TOP_IDX]}\t"
+                f"{fx[BOT_IDX]}\t{fy[BOT_IDX]}\t{fz[BOT_IDX]}\n"
             )
